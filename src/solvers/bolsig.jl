@@ -1,0 +1,1 @@
+struct BOLSIG <: Solver end

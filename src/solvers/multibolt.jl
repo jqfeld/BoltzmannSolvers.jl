@@ -1,0 +1,1 @@
+struct MultiBolt <: Solver end
