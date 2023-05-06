@@ -1,0 +1,3 @@
+[deps]
+BoltzmannSolvers = "3936891d-e4a6-4f9f-ac95-6e87deea8a87"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
