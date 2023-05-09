@@ -1,7 +1,7 @@
 struct LoKI <: Solver end
 
 
-NAMES = Dict{String,Symbol}(
+LOKI_NAMES = Dict{String,Symbol}(
     [
     "RedField(Td)" => :reduced_field,
     "RedDiff((ms)^-1)" => :reduced_diffusion_coef,
@@ -16,7 +16,7 @@ NAMES = Dict{String,Symbol}(
     "EleTemp(eV)" => :electron_temperature,
 ])
 
-function load_dataframe(::LoKI, source, names=NAMES)
+function load_dataframe(::LoKI, source, names=LOKI_NAMES)
     swarm_table_file = joinpath(source, "lookUpTableSwarm.txt")
     df_swarm = CSV.read(swarm_table_file, DataFrame,
         comment="#",
