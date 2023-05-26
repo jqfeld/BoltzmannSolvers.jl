@@ -1,24 +1,40 @@
 struct MultiBolt <: Solver end
 
-MULTIBOLT_NAMES = Dict{String,Symbol}(
-    [
-    "E_N" => :reduced_field,
-    # "RedDiff((ms)^-1)" => :reduced_diffusion_coef,
-    "muN_FLUX" => :reduced_mobility,
-    # "DriftVelocity(ms^-1)" => :drift_velocity,
-    # "RedTow(m^2)" => :reduced_townsend_ion_coef,
-    # "RedAtt(m^2)" => :reduced_attachment_coef,
-    # "RedDiffE(eV(ms)^-1)" => :reduced_energy_diffusion_coef,
-    # "RedMobE(eV(msV)^-1)" => :reduced_energy_mobility,
-    "avg_en" => :mean_energy,
-    # "CharE(eV)" => :characteristic_energy,
-    # "EleTemp(eV)" => :electron_temperature,
-])
 
-function load_dataframe(::MultiBolt, source, names=MULTIBOLT_NAMES)
+function default_names(::MultiBolt, names=Dict{String,Symbol}();
+    replace=false)
+    default_names = Dict{String,Symbol}(
+        [
+        "E_N" => :reduced_field,
+        # "RedDiff((ms)^-1)" => :reduced_diffusion_coef,
+        "muN_FLUX" => :reduced_mobility,
+        # "DriftVelocity(ms^-1)" => :drift_velocity,
+        "alpha_eff_N" => :reduced_townsend_alpha_coef,
+        # "RedAtt(m^2)" => :reduced_attachment_coef,
+        # "RedDiffE(eV(ms)^-1)" => :reduced_energy_diffusion_coef,
+        # "RedMobE(eV(msV)^-1)" => :reduced_energy_mobility,
+        "avg_en" => :mean_energy,
+        # "CharE(eV)" => :characteristic_energy,
+        # "EleTemp(eV)" => :electron_temperature,
+    ])
+    if replace == true
+        return names
+    else
+        return merge(default_names, names)
+
+    end
+end
+
+
+function load_dataframe(::MultiBolt, source;
+    names=default_names(MultiBolt()),
+    replace_strings=[]
+)
     swarm_param_files = [
         "muN_FLUX.txt",
-        "avg_en.txt"] .|> x -> joinpath(source, x)
+        "avg_en.txt",
+        "alpha_eff_N.txt",
+    ] .|> x -> joinpath(source, x)
 
     df = innerjoin(
         CSV.read.(swarm_param_files, DataFrame,
@@ -33,23 +49,21 @@ function load_dataframe(::MultiBolt, source, names=MULTIBOLT_NAMES)
     for gas in gas_list
         rate_filenames = readdir(joinpath(rates_directory, gas))
         df = map(rate_filenames) do x
-            CSV.read(joinpath(rates_directory, gas, x), DataFrame,
+            file = joinpath(rates_directory, gas, x)
+            line = filter(startswith("# Process:"), readlines(file))[1]
+            lhs, dir, rhs, type = match(r"(?::\s*)(.*?)(->|<->)(.*?),\s*(.*)$", line)
+            if dir != "->"
+                error("Only '->' implemented.")
+            end
+            reaction_name = replace("$(lhs)-->$(rhs)", "E" => "e", " " => "", replace_strings...)
+            if startswith(x, "alpha") 
+                reaction_name = "alpha($reaction_name)"
+            end
+            CSV.read(file, DataFrame,
                 comment="#",
                 delim="\t",
                 skipto=7,
-                header=[
-                    "E_N",
-                    (
-                        length(gas_list) > 1 ?
-                        replace(gas, "_" => "") * "_" :
-                        ""
-                    ) *
-                    replace(x,
-                        ".txt" => "",
-                        "alpha_N_0" => "alpha_N",
-                        "_" => "",
-                        # count=2
-                    )]
+                header=["E_N", reaction_name]
             )
         end |> x -> innerjoin(df, x..., on="E_N")
     end
