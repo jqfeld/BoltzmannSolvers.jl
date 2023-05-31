@@ -52,6 +52,9 @@ function load_dataframe(::MultiBolt, source;
             if startswith(x, "alpha") 
                 reaction_name = "alpha($reaction_name)"
             end
+            if startswith(x, "eta") 
+                reaction_name = "eta($reaction_name)"
+            end
             CSV.read(file, DataFrame,
                 comment="#",
                 delim="\t",
