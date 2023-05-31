@@ -1,17 +1,22 @@
 name = "BoltzmannSolvers"
 uuid = "3936891d-e4a6-4f9f-ac95-6e87deea8a87"
 authors = ["Jan Kuhfeld <jan.kuhfeld@rub.de> and contributors"]
-version = "1.0.0-DEV"
+version = "0.1.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
-PlasmaSpecies = "1237f1af-269d-46a1-ad5b-ab7f5eece4fc"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
+[weakdeps]
+PlasmaSpecies = "1237f1af-269d-46a1-ad5b-ab7f5eece4fc"
+
+[extensions]
+PlasmaSpeciesExt = "PlasmaSpecies"
+
 [compat]
-julia = "1"
+julia = "1.9"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

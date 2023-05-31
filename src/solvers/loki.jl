@@ -39,20 +39,20 @@ function parse_reaction_names(::LoKI, source, replace_strings=[])
         if type == "Effective"
             key = "R$(id)_ine(m^3s^-1)"
             value = "Effective($lhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
             continue
         end
         if dir == "->"
             key = "R$(id)_ine(m^3s^-1)"
             value = "$(lhs)-->$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
         elseif dir == "<->"
             key = "R$(id)_ine(m^3s^-1)"
             value = "$(lhs)-->$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
             key = "R$(id)_sup(m^3s^-1)"
             value = "$(lhs)<--$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
         end
     end
     return reaction_dict

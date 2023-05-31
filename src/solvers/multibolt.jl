@@ -49,6 +49,7 @@ function load_dataframe(::MultiBolt, source;
                 error("Only '->' implemented.")
             end
             reaction_name = replace("$(lhs)-->$(rhs)", "E" => "e", " " => "", replace_strings...)
+            normalize_reaction_name!(reaction_name)
             if startswith(x, "alpha") 
                 reaction_name = "alpha($reaction_name)"
             end
