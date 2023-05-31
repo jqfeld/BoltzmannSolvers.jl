@@ -10,7 +10,12 @@ Normalize the reaction name using `PlasmaSpecies.jl`. If `PlasmaSpecies.jl` is n
 PlasmaSpecies is loaded!
 """
 function BoltzmannSolvers.normalize_reaction_name!(str::String)
-    string(parse_reaction(str)) 
+    try
+    str = string(parse_reaction(str)) 
+    catch e
+        @warn "Error while parsing" str
+    end
+    return string
 end
 
 end

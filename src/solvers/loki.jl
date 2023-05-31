@@ -26,8 +26,8 @@ function default_names(::LoKI, names=Dict{String,Symbol}();
     end
 end
 
-function parse_reaction_names(::LoKI, source, replace_strings=[])
-    reaction_dict = Dict{String,Symbol}()
+function parse_reaction_names(::LoKI, source; replace_strings=[],normalize=false)
+    reaction_dict = Dict{String,String}()
     rate_table_file = joinpath(source, "lookUpTableRateCoeff.txt")
     lines = filter(startswith('#'), readlines(rate_table_file))
     for l in lines
@@ -39,20 +39,25 @@ function parse_reaction_names(::LoKI, source, replace_strings=[])
         if type == "Effective"
             key = "R$(id)_ine(m^3s^-1)"
             value = "Effective($lhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
+            reaction_dict[key] = replace(value, replace_strings...)
             continue
         end
         if dir == "->"
             key = "R$(id)_ine(m^3s^-1)"
             value = "$(lhs)-->$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
+            reaction_dict[key] = replace(value, replace_strings...)
         elseif dir == "<->"
             key = "R$(id)_ine(m^3s^-1)"
             value = "$(lhs)-->$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
+            reaction_dict[key] = replace(value, replace_strings...)
             key = "R$(id)_sup(m^3s^-1)"
             value = "$(lhs)<--$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...)) |> normalize_reaction_name!
+            reaction_dict[key] = replace(value, replace_strings...)
+        end
+    end
+    if normalize == true
+        for key in keys(reaction_dict)
+            normalize_reaction_name!(reaction_dict[key])
         end
     end
     return reaction_dict
@@ -61,7 +66,8 @@ end
 
 function load_dataframe(::LoKI, source;
     replace_strings=[],
-    names=default_names(LoKI())
+    names=default_names(LoKI()),
+    normalize=false
 )
     swarm_table_file = joinpath(source, "lookUpTableSwarm.txt")
     df_swarm = CSV.read(swarm_table_file, DataFrame,
@@ -75,7 +81,7 @@ function load_dataframe(::LoKI, source;
         delim=" ",
         ignorerepeated=true
     )
-    rename!(df_rate_coef, parse_reaction_names(LoKI(), source, replace_strings))
+    rename!(df_rate_coef, parse_reaction_names(LoKI(), source, replace_strings=replace_strings, normalize=normalize))
     return rename!(
         innerjoin(df_swarm, df_rate_coef, on="RedField(Td)"),
         names
