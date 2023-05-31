@@ -6,16 +6,9 @@ function default_names(::MultiBolt, names=Dict{String,Symbol}();
     default_names = Dict{String,Symbol}(
         [
         "E_N" => :reduced_field,
-        # "RedDiff((ms)^-1)" => :reduced_diffusion_coef,
         "muN_FLUX" => :reduced_mobility,
-        # "DriftVelocity(ms^-1)" => :drift_velocity,
         "alpha_eff_N" => :reduced_townsend_alpha_coef,
-        # "RedAtt(m^2)" => :reduced_attachment_coef,
-        # "RedDiffE(eV(ms)^-1)" => :reduced_energy_diffusion_coef,
-        # "RedMobE(eV(msV)^-1)" => :reduced_energy_mobility,
         "avg_en" => :mean_energy,
-        # "CharE(eV)" => :characteristic_energy,
-        # "EleTemp(eV)" => :electron_temperature,
     ])
     if replace == true
         return names
