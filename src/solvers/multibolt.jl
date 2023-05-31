@@ -44,7 +44,7 @@ function load_dataframe(::MultiBolt, source;
         df = map(rate_filenames) do x
             file = joinpath(rates_directory, gas, x)
             line = filter(startswith("# Process:"), readlines(file))[1]
-            lhs, dir, rhs, type = match(r"(?::\s*)(.*?)(->|<->)(.*?),\s*(.*)$", line)
+            lhs, dir, rhs, type = match(r"(?:Process:\s*)(.*?)(->|<->)(.*?)(?:,\s*(Attachment|Excitation|Ionization|Elastic|Effective))$", line)
             if dir != "->"
                 error("Only '->' implemented.")
             end
@@ -52,6 +52,9 @@ function load_dataframe(::MultiBolt, source;
             normalize_reaction_name!(reaction_name)
             if startswith(x, "alpha") 
                 reaction_name = "alpha($reaction_name)"
+            end
+            if startswith(x, "eta") 
+                reaction_name = "eta($reaction_name)"
             end
             CSV.read(file, DataFrame,
                 comment="#",
