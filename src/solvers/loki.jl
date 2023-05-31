@@ -2,10 +2,8 @@ struct LoKI <: Solver end
 
 
 
-function default_names(::LoKI, names=Dict{String,Symbol}();
-    replace=false)
-    default_names = Dict{String,Symbol}(
-        [
+function default_swarm_names(l::LoKI)
+    default_names = [
         "RedField(Td)" => :reduced_field,
         "RedDiff((ms)^-1)" => :reduced_diffusion_coef,
         "RedMob((msV)^-1)" => :reduced_mobility,
@@ -17,19 +15,15 @@ function default_names(::LoKI, names=Dict{String,Symbol}();
         "MeanE(eV)" => :mean_energy,
         "CharE(eV)" => :characteristic_energy,
         "EleTemp(eV)" => :electron_temperature,
-    ])
-    if replace == true
-        return names
-    else
-        return merge(default_names, names)
-
-    end
+    ]
 end
 
-function parse_reaction_names(::LoKI, source, replace_strings=[])
-    reaction_dict = Dict{String,Symbol}()
+function parse_reaction_names(l::LoKI, source, kwargs...)
+
+    reaction_names = Pair[]
     rate_table_file = joinpath(source, "lookUpTableRateCoeff.txt")
     lines = filter(startswith('#'), readlines(rate_table_file))
+
     for l in lines
         m = match(r"(\d+)\s+([^\-\<]+)(<->|->|<-)(.*),(.+?)\s", l)
         if isnothing(m)
@@ -39,29 +33,29 @@ function parse_reaction_names(::LoKI, source, replace_strings=[])
         if type == "Effective"
             key = "R$(id)_ine(m^3s^-1)"
             value = "Effective($lhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            push!(reaction_names, key => value)
             continue
         end
         if dir == "->"
             key = "R$(id)_ine(m^3s^-1)"
             value = "$(lhs)-->$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            push!(reaction_names, key => value)
         elseif dir == "<->"
             key = "R$(id)_ine(m^3s^-1)"
             value = "$(lhs)-->$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            push!(reaction_names, key => value)
             key = "R$(id)_sup(m^3s^-1)"
             value = "$(lhs)<--$(rhs)"
-            reaction_dict[key] = Symbol(replace(value, replace_strings...))
+            push!(reaction_names, key => value)
         end
     end
-    return reaction_dict
+    return reaction_names
+
 end
 
 
-function load_dataframe(::LoKI, source;
-    replace_strings=[],
-    names=default_names(LoKI())
+function load_raw_dataframe(l::LoKI, source;
+    kwargs...
 )
     swarm_table_file = joinpath(source, "lookUpTableSwarm.txt")
     df_swarm = CSV.read(swarm_table_file, DataFrame,
@@ -69,16 +63,14 @@ function load_dataframe(::LoKI, source;
         delim=" ",
         ignorerepeated=true
     )
+
     rate_table_file = joinpath(source, "lookUpTableRateCoeff.txt")
     df_rate_coef = CSV.read(rate_table_file, DataFrame,
         comment="#",
         delim=" ",
         ignorerepeated=true
     )
-    rename!(df_rate_coef, parse_reaction_names(LoKI(), source, replace_strings))
-    return rename!(
-        innerjoin(df_swarm, df_rate_coef, on="RedField(Td)"),
-        names
-    )
+
+    return innerjoin(df_swarm, df_rate_coef, on="RedField(Td)")
 end
 

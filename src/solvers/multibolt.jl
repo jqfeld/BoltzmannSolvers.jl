@@ -1,28 +1,18 @@
 struct MultiBolt <: Solver end
 
 
-function default_names(::MultiBolt, names=Dict{String,Symbol}();
-    replace=false)
-    default_names = Dict{String,Symbol}(
+function default_swarm_names(::MultiBolt)
+    default_names =
         [
         "E_N" => :reduced_field,
         "muN_FLUX" => :reduced_mobility,
         "alpha_eff_N" => :reduced_townsend_alpha_coef,
         "avg_en" => :mean_energy,
-    ])
-    if replace == true
-        return names
-    else
-        return merge(default_names, names)
-
-    end
+    ]
 end
 
 
-function load_dataframe(::MultiBolt, source;
-    names=default_names(MultiBolt()),
-    replace_strings=[]
-)
+function load_raw_dataframe(::MultiBolt, source; kwargs...)
     swarm_param_files = [
         "muN_FLUX.txt",
         "avg_en.txt",
@@ -48,7 +38,7 @@ function load_dataframe(::MultiBolt, source;
             if dir != "->"
                 error("Only '->' implemented.")
             end
-            reaction_name = replace("$(lhs)-->$(rhs)", "E" => "e", " " => "", replace_strings...)
+            reaction_name = replace("$(lhs)-->$(rhs)", "E" => "e", " " => "")
             if startswith(x, "alpha") 
                 reaction_name = "alpha($reaction_name)"
             end
@@ -64,6 +54,12 @@ function load_dataframe(::MultiBolt, source;
         end |> x -> innerjoin(df, x..., on="E_N")
     end
 
-    return rename!(df, names)
+    return df
 end
 
+"""
+    parse_reaction_names(::Multibolt, source)
+
+Do nothing. For MultiBolt it is more convenient to parse the reaction process already in `load_raw_dataframe`.
+"""
+parse_reaction_names(::MultiBolt, _) = Pair[]
