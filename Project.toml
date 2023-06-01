@@ -16,7 +16,9 @@ PlasmaSpecies = "1237f1af-269d-46a1-ad5b-ab7f5eece4fc"
 PlasmaSpeciesExt = "PlasmaSpecies"
 
 [compat]
-julia = "1.9"
+DataFrames = "1"
+julia = "1"
+
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
