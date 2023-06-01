@@ -18,7 +18,7 @@ function load_dataframe(s::S, source;
     reaction_names = parse_reaction_names(s, source)
     rename!(df, reaction_names...)
     if !isnothing(replacements)
-        rename!(df, names(df) .=> replace.(names(df), replacements))
+        rename!(df, names(df) .=> replace.(names(df), replacements...))
     end 
 
     if normalize
