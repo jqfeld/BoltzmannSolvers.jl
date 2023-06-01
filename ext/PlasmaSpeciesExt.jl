@@ -4,12 +4,12 @@ using PlasmaSpecies
 
 
 """
-    normalize_reaction_name!(x)
+    normalize_reaction_names(x)
 
 Normalize the reaction name using `PlasmaSpecies.jl`. If `PlasmaSpecies.jl` is not loaded, this is a NOP.
 PlasmaSpecies is loaded!
 """
-function BoltzmannSolvers.normalize_reaction_name(str::String)
+function BoltzmannSolvers.normalize_reaction_names(str::String)
     out = str
     try
         out = string(parse_reaction(str)) 
