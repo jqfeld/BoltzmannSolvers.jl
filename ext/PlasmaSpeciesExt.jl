@@ -9,13 +9,14 @@ using PlasmaSpecies
 Normalize the reaction name using `PlasmaSpecies.jl`. If `PlasmaSpecies.jl` is not loaded, this is a NOP.
 PlasmaSpecies is loaded!
 """
-function BoltzmannSolvers.normalize_reaction_name!(str::String)
+function BoltzmannSolvers.normalize_reaction_name(str::String)
+    out = str
     try
-    str = string(parse_reaction(str)) 
+        out = string(parse_reaction(str)) 
     catch e
-        @warn "Error while parsing" str
+        @warn "Error while parsing" str out
     end
-    return string
+    return out
 end
 
 end
