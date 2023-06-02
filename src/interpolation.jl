@@ -9,9 +9,6 @@ NamedInterpolation(name, y, x) = NamedInterpolation(name,LinearInterpolation(y,x
 Base.nameof(i::NamedInterpolation) = i.name
 Base.show(io::IO, i::NamedInterpolation) = Base.print(io::IO, "[$(i.name)]")
 
-using Symbolics: Num, unwrap, SymbolicUtils
-(i::NamedInterpolation)(x::Num) = SymbolicUtils.term(i, unwrap(x))
-SymbolicUtils.promote_symtype(::NamedInterpolation, _...) = Real
 
 (i::NamedInterpolation)(x) = i.itp(x)
 
