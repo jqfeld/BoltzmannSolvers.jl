@@ -17,6 +17,7 @@ Base.show(io::IO, i::NamedInterpolation) = Base.print(io::IO, "[$(i.name)]")
 findclosest(a, A) = argmin(x -> abs(x - a), A)
 exprange(start, stop, length) = [start; exp.(range(0, log(stop), length))]
 
+
 """
     `create_interpolation(df::DataFrame, y_name, x_name; name=y_name)`
 

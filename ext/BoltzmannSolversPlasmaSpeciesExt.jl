@@ -1,4 +1,4 @@
-module PlasmaSpeciesExt
+module BoltzmannSolversPlasmaSpeciesExt
 using BoltzmannSolvers
 using PlasmaSpecies
 
