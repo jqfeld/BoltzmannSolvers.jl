@@ -1,4 +1,4 @@
-module BoltzmannSolverSymbolicsExt
+module BoltzmannSolversSymbolicsExt
     using BoltzmannSolvers
 
     using Symbolics: Num, unwrap, SymbolicUtils
