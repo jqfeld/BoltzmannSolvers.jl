@@ -6,6 +6,8 @@ function default_swarm_names(::MultiBolt)
         [
         "E_N" => :reduced_field,
         "muN_FLUX" => :reduced_mobility,
+        "DLN_FLUX" => :longitudinal_diff_coef,
+        "DTN_FLUX" => :transversal_diff_coef,
         "alpha_eff_N" => :reduced_townsend_alpha_coef,
         "avg_en" => :mean_energy,
     ]
@@ -15,6 +17,8 @@ end
 function load_raw_dataframe(::MultiBolt, source; kwargs...)
     swarm_param_files = [
         "muN_FLUX.txt",
+        "DTN_FLUX.txt",
+        "DLN_FLUX.txt",
         "avg_en.txt",
         "alpha_eff_N.txt",
     ] .|> x -> joinpath(source, x)
