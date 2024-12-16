@@ -20,7 +20,7 @@ BoltzmannSolversSymbolicsExt = "Symbolics"
 CSV = "0.10"
 DataFrames = "1"
 DataInterpolations = "6"
-Symbolics = "5"
+Symbolics = "6"
 julia = "1"
 
 [extras]
