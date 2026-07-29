@@ -1,0 +1,46 @@
+/NOSCREEN
+
+/NOLOGFILE
+
+READCOLLISIONS
+SigloDataBase-LXCat-04Jun2013.txt   / File
+Ar                  / Species
+1                    / Extrapolate: 0= No 1= Yes
+
+READCOLLISIONS
+SigloDataBase-LXCat-04Jun2013.txt   / File
+He                   / Species
+1                    / Extrapolate: 0= No 1= Yes
+
+CONDITIONS
+10.       / Electric field / N (Td)
+0.        / Angular field frequency / N (m3/s)
+0.        / Cosine of E-B field angle
+300.      / Gas temperature (K)
+300.      / Excitation temperature (K)
+0.        / Transition energy (eV)
+0.        / Ionization degree
+1e18      / Plasma density (1/m3)
+1.        / Ion charge parameter
+1.        / Ion/neutral mass ratio
+3         / e-e momentum effects & modified Coulomb logarithm: 0=No&No; 1=Yes&No; 2=No&Yes; 3=Yes&Yes*
+1         / Energy sharing: 1=Equal*; 2=One takes all
+1         / Growth: 1=Temporal*; 2=Spatial; 3=Not included; 4=Grad-n expansion
+0.        / Maxwellian mean energy (eV)
+100       / # of grid points
+0         / Manual grid: 0=No; 1=Linear; 2=Parabolic
+200.      / Manual maximum energy (eV)
+1e-10     / Precision
+1e-4      / Convergence
+1000      / Maximum # of iterations
+1.  VAR   / Gas composition fractions
+1         / Normalize composition to unity: 0=No; 1=Yes
+
+RUN2D
+1                   / First variable: 1=E/N; 2=Mean energy; 3=Maxwellian energy
+0.1  100.  0.  1.  / Min1 Max1 Min2 Max2
+20   5            / Num1 Num2
+2    1            / Type1 Type2: 1=Linear; 2=Quadratic; 3=Exponential
+example3.dat     / Output file
+
+END
