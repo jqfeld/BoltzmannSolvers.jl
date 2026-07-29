@@ -6,7 +6,7 @@ export LoKI
 include("solvers/multibolt.jl")
 export MultiBolt
 
-#TODO: implement bolsig and multibolt
 include("solvers/bolsig.jl")
+export BOLSIG
 
 

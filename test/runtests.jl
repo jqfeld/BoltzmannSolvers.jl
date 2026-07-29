@@ -1,6 +1,5 @@
-using BoltzmannSolvers
-using Test
+using SafeTestsets
 
-@testset "BoltzmannSolvers.jl" begin
-    # Write your tests here.
+@safetestset "BOLSIG solver" begin
+    include("test_bolsig.jl")
 end

@@ -7,10 +7,16 @@
 
 WIP package to use the output of various Boltzmann solver codes in Julia. 
 
-Currently, reading the output from two solvers are implemented:
+Currently, reading the output from three solvers are implemented:
 
 - `LoKI()`
 - `MultiBolt()`
+- `BOLSIG()` — `source` is a single BOLSIG+ output file (not a directory).
+  Auto-detects which of BOLSIG+'s three result layouts the file uses: the
+  condensed `R#`/`A#`/`C#` indexed-table format, the verbose
+  block-per-quantity format (values wrapped across multiple lines), or the
+  single-run `R#`-header name/value report. 2D parametric scans (varying two
+  conditions at once) are not yet supported.
 
 ## Examples
 
@@ -20,3 +26,7 @@ julia> df = load_dataframe(MultiBolt(), "/some/path/to/solver/output", replaceme
 julia> meanE = create_interpolation(df, :mean_energy, :reduced_field)
 julia> meanE(100) # value of :mean_energy at 100 Td
 ```
+
+## TODO
+
+- Add synthetic test data for `LoKI`/`MultiBolt` solver output (e.g. under `test/`, similar to `LXCat.jl`'s `test/test_data.txt`) and real tests in `test/runtests.jl` — currently that file is an empty placeholder, so `load_raw_dataframe`/`default_swarm_names`/`parse_reaction_names` for both solvers are untested.

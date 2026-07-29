@@ -9,14 +9,15 @@ load_raw_dataframe(::Solver, source) = error("Not implemented for this solver.")
 default_swarm_names(::Solver) = error("Not implemented for this solver.")
 
 
-function load_dataframe(s::S, source; 
-    replacements=nothing, 
+function load_dataframe(s::S, source;
+    replacements=nothing,
     normalize=false,
     kwargs...) where S <: Solver
     df = load_raw_dataframe(s, source; kwargs...)
-    rename!(df, default_swarm_names(s)...)
+    existing_names = Set(names(df))
+    rename!(df, filter(p -> first(p) in existing_names, default_swarm_names(s))...)
     reaction_names = parse_reaction_names(s, source)
-    rename!(df, reaction_names...)
+    rename!(df, filter(p -> first(p) in existing_names, reaction_names)...)
     if !isnothing(replacements)
         rename!(df, names(df) .=> replace.(names(df), replacements...))
     end 
