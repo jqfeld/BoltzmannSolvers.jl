@@ -17,7 +17,7 @@ export BOLSIGSeriesType, LinearSeries, QuadraticSeries, ExponentialSeries
 export read_bolsig_input, write_bolsig_input
 
 include("solvers/bolsig_run.jl")
-export BOLSIGRunResult, run_bolsig
+export BOLSIGRunResult, run_solver
 
 include("solvers/multibolt_input.jl")
 export MultiBoltInput, MultiBoltSpecies, MultiBoltXsecScale
@@ -28,6 +28,6 @@ export MultiBoltScatteringModel, IsotropicScattering, IdealForwardScattering, Sc
 export MultiBoltInterpMethod, LinearInterp, LogarithmicInterp
 
 include("solvers/multibolt_run.jl")
-export MultiBoltRunResult, run_multibolt
+export MultiBoltRunResult
 
 

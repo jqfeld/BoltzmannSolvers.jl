@@ -128,7 +128,7 @@ Configuration for one MultiBolt run. Unlike [`BOLSIGInput`](@ref), this
 isn't read from/written to a file — MultiBolt takes its configuration
 entirely as command-line arguments — so `MultiBoltInput` is only ever
 translated into an argument vector (via `_multibolt_args`, used by
-[`run_multibolt`](@ref)), not serialized.
+[`run_solver`](@ref)`(::MultiBoltInput; ...)`), not serialized.
 
 Required: `cross_section_files`, `species`, `export_name`. Everything else
 has a default matching MultiBolt's own CLI defaults, or `nothing`/`false`
@@ -153,9 +153,9 @@ Base.@kwdef struct MultiBoltInput
     sweep::Union{MultiBoltSweep,Nothing} = nothing   # nothing = single run at the conditions above (see _multibolt_args: internally becomes a 1-point `def` sweep at EN_Td, since a truly bare invocation crashes the real binary)
 
     # Export. `export_location` is deliberately not a field here —
-    # `run_multibolt` controls it (a fresh temp directory per run), the
+    # `run_solver` controls it (a fresh temp directory per run), the
     # same way BOLSIGSaveResults.file is a bare filename within a
-    # run_bolsig-managed workdir rather than an absolute path.
+    # run_solver-managed workdir rather than an absolute path.
     export_name::String
     limit_export::Bool = false
     export_xsecs::Bool = false
@@ -212,7 +212,7 @@ end
 
 Translate `config` into the argument vector `multibolt_linux`/
 `multibolt_win64.exe` expects, with `--export_location` fixed to
-`export_location` (managed by [`run_multibolt`](@ref)).
+`export_location` (managed by [`run_solver`](@ref)`(::MultiBoltInput; ...)`).
 """
 function _multibolt_args(c::MultiBoltInput, export_location::AbstractString)
     _validate_multibolt_input(c)

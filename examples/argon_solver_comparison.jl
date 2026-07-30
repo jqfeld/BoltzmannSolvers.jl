@@ -25,7 +25,7 @@ bolsig_input = BOLSIGInput(;
     runs       = [BOLSIGExplicitRun(reshape(en_td_values, :, 1))],
     save       = BOLSIGSaveResults(file="ar_scan.dat", format=3),
 )
-bolsig_result = run_bolsig(bolsig_input; collision_dir)
+bolsig_result = run_solver(bolsig_input; collision_dir)
 bolsig_result.success || error("BOLSIG+ run failed:\n$(bolsig_result.log)")
 bolsig_df = load_dataframe(BOLSIG(), bolsig_result.output_files[1])
 
@@ -37,7 +37,7 @@ multibolt_config = MultiBoltInput(;
     export_name         = "ar_scan",
     sweep               = MultiBoltSweep(ENTdSweep, MultiBoltDefinedSweep(en_td_values)),
 )
-multibolt_result = run_multibolt(multibolt_config; multibolt_path=get(ENV, "MULTIBOLT_PATH", nothing))
+multibolt_result = run_solver(multibolt_config; multibolt_path=get(ENV, "MULTIBOLT_PATH", nothing))
 multibolt_result.success || error("MultiBolt run failed:\n$(multibolt_result.log)")
 multibolt_df = load_dataframe(MultiBolt(), multibolt_result.output_dir)
 

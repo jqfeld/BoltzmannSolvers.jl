@@ -15,7 +15,7 @@ WIP package for working with electron Boltzmann-equation solver codes in Julia: 
 
 ## Solvers
 
-Three solvers are supported. Reading output always goes through the same entry point, `load_dataframe(solver, source; replacements, normalize, kwargs...)`, which normalizes each solver's native column names to a shared set of symbols (e.g. `:reduced_field`, `:mean_energy`, `:reduced_mobility`) so results from different solvers can be compared directly.
+Three solvers are supported. Reading output always goes through the same entry point, `load_dataframe(solver, source; replacements, normalize, kwargs...)`, which normalizes each solver's native column names to a shared set of symbols (e.g. `:reduced_field`, `:mean_energy`, `:reduced_mobility`) so results from different solvers can be compared directly. For BOLSIG+ and MultiBolt, actually *running* the solver goes through a single `run_solver(config; kwargs...)`, dispatched on `config`'s type (`BOLSIGInput`/`MultiBoltInput`) rather than a separate solver marker — the config type alone already says which solver to run.
 
 ### `LoKI()`
 
@@ -30,7 +30,7 @@ Reading `.h5` files requires `using HDF5` first — `HDF5.jl` is a weak dependen
 MultiBolt has no input *file* format — it's entirely command-line-argument driven, so there's no `read_multibolt_input`/`write_multibolt_input` pair the way BOLSIG+ has:
 
 - `MultiBoltInput(; kwargs...)` models one run's configuration (cross-section files, species/fractions, sweep, scattering models, convergence settings, ...).
-- `run_multibolt(config::MultiBoltInput; multibolt_path=nothing)` translates it into CLI args and runs the binary in a fresh temp directory. `multibolt_path` resolves from the keyword argument, then the `MULTIBOLT_PATH` environment variable. Returns a `MultiBoltRunResult` (`workdir`, `output_dir`, `success`, `exit_code`, `log`), with `success = exit_code == 0 && isdir(output_dir)` — MultiBolt exits `0` on a normal run.
+- `run_solver(config::MultiBoltInput; multibolt_path=nothing)` translates it into CLI args and runs the binary in a fresh temp directory. `multibolt_path` resolves from the keyword argument, then the `MULTIBOLT_PATH` environment variable. Returns a `MultiBoltRunResult` (`workdir`, `output_dir`, `success`, `exit_code`, `log`), with `success = exit_code == 0 && isdir(output_dir)` — MultiBolt exits `0` on a normal run.
 
 **Caveat**: a bare invocation with no `--sweep_option`/`--sweep_style` at all reliably crashes `multibolt_linux` with `std::bad_alloc`, regardless of grid/convergence settings — a real bug in the binary itself. `MultiBoltInput`'s `sweep = nothing` default ("just run once at the given conditions") is handled by transparently routing it through an equivalent 1-point `def` sweep at the current `EN_Td`, so this doesn't surface as a footgun.
 
@@ -41,7 +41,7 @@ MultiBolt has no input *file* format — it's entirely command-line-argument dri
 BOLSIG+ *input* scripts (the `.dat` files that configure a run) can also be read/written, independent of the output-reading interface:
 
 - `read_bolsig_input(path) -> BOLSIGInput` / `write_bolsig_input(path, input::BOLSIGInput)`. `BOLSIGInput` models one standalone run — collision data sources, the `CONDITIONS` block (any field may be `VAR`, BOLSIG+'s placeholder for a swept variable), one or more run specs (`BOLSIGFixedRun`/`BOLSIGExplicitRun`/`BOLSIGSeriesRun`/`BOLSIGRun2D`), and a `BOLSIGSaveResults`. `BOLSIGSaveResults.format` predicts which output layout you'll get back: `1`→single-run report, `2`→condensed, `3`→verbose (`4`/`5`/`6` — Energy/SIGLO/PLASIMO — aren't read by `BOLSIG()`). Doesn't model BOLSIG+'s full scripting language (e.g. concatenating multiple scripts via `CLEARCOLLISIONS`/`CLEARRUNS` resets in one file) — one `BOLSIGInput` is one script.
-- `run_bolsig(input::BOLSIGInput; bolsig_path=nothing, collision_dir=pwd())` runs the real `bolsigminus` binary: writes `input` to a fresh temp directory, places a copy/symlink of every referenced collision file there (BOLSIG+'s input format can't reference them by absolute or subdirectory-relative path — its own `/`-comment convention breaks both), and runs the binary there. `bolsig_path` resolves from the keyword argument, then the `BOLSIGMINUS_PATH` environment variable. Returns a `BOLSIGRunResult` (`workdir`, `output_files`, `success`, `exit_code`, `log`).
+- `run_solver(input::BOLSIGInput; bolsig_path=nothing, collision_dir=pwd())` runs the real `bolsigminus` binary: writes `input` to a fresh temp directory, places a copy/symlink of every referenced collision file there (BOLSIG+'s input format can't reference them by absolute or subdirectory-relative path — its own `/`-comment convention breaks both), and runs the binary there. `bolsig_path` resolves from the keyword argument, then the `BOLSIGMINUS_PATH` environment variable. Returns a `BOLSIGRunResult` (`workdir`, `output_files`, `success`, `exit_code`, `log`).
 
 **Caveat**: `success` is based on whether the expected output file(s) exist, not on `exit_code` — BOLSIG+ always tries to read further commands from stdin after finishing its input file and exits with code `2` when there's nothing more to read, on every run, success or failure alike. That's normal behavior, not something to work around.
 
@@ -73,7 +73,7 @@ julia> input = BOLSIGInput(;
            runs       = [BOLSIGSeriesRun([BOLSIGSeriesSegment(ReducedFieldVar, 1.0, 1000.0, 50, ExponentialSeries)])],
            save       = BOLSIGSaveResults(file="results.dat", format=3),
        )
-julia> result = run_bolsig(input; bolsig_path="/opt/bolsig/bolsigminus", collision_dir="/opt/bolsig/xsdata")
+julia> result = run_solver(input; bolsig_path="/opt/bolsig/bolsigminus", collision_dir="/opt/bolsig/xsdata")
 julia> result.success || error("BOLSIG+ run failed:\n$(result.log)")
 julia> df = load_dataframe(BOLSIG(), result.output_files[1])
 ```
@@ -88,7 +88,7 @@ julia> config = MultiBoltInput(;
            export_name         = "my_run",
            sweep               = MultiBoltSweep(ENTdSweep, MultiBoltDefinedSweep([50.0, 100.0, 200.0])),
        )
-julia> result = run_multibolt(config; multibolt_path="/opt/multibolt/multibolt_linux")
+julia> result = run_solver(config; multibolt_path="/opt/multibolt/multibolt_linux")
 julia> result.success || error("MultiBolt run failed:\n$(result.log)")
 julia> df = load_dataframe(MultiBolt(), result.output_dir)
 ```

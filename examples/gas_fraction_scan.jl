@@ -6,7 +6,7 @@ using Statistics: mean, std
 
 # Same run as first_run.jl (10%/90% Ar/He mixture, E/N swept 0.1-1000 Td via
 # two chained RUNSERIES segments), repeated for four different Ar/He mixture
-# ratios — each run gets its own fresh temp directory from run_bolsig, so
+# ratios — each run gets its own fresh temp directory from run_solver, so
 # reusing the same output filename across runs is safe (no collisions).
 function build_input(gas_fractions)
     return BOLSIGInput(;
@@ -36,7 +36,7 @@ collision_dir = joinpath(@__DIR__, "data")
 
 dataframes = map(gas_fraction_sets) do gas_fractions
     input = build_input(gas_fractions)
-    result = run_bolsig(input; collision_dir)
+    result = run_solver(input; collision_dir)
     result.success || error("BOLSIG+ run failed for gas_fractions=$gas_fractions:\n$(result.log)")
     return load_dataframe(BOLSIG(), result.output_files[1])
 end
@@ -110,7 +110,7 @@ gp_models = Dict(col => fit_gp(Xdata, Float64.(combined[!, col])) for col in out
 demo_columns = ("mean_energy", "reduced_mobility", "reduced_townsend_alpha_coef")
 
 function run_and_extract(gas_fractions; e_n_target=10.0)
-    result = run_bolsig(build_input(gas_fractions); collision_dir)
+    result = run_solver(build_input(gas_fractions); collision_dir)
     result.success || error("BOLSIG+ run failed for gas_fractions=$gas_fractions:\n$(result.log)")
     df = load_dataframe(BOLSIG(), result.output_files[1])
     row = argmin(abs.(df.reduced_field .- e_n_target))

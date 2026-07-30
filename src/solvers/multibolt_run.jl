@@ -7,14 +7,15 @@
 #     input file, so unlike BOLSIG+ there's no file-format quirk to work
 #     around: both `--LXCat_Xsec_fid` and `--export_location` accept
 #     absolute paths directly (tested), so no collision-file
-#     copying/symlinking is needed the way `run_bolsig` needs it.
+#     copying/symlinking is needed the way `run_solver(::BOLSIGInput; ...)`
+#     needs it.
 #   - MultiBolt exits with code 0 on a normal completed run (tested) — no
 #     analog of BOLSIG+'s "always exits 2, that's normal" quirk.
 
 """
     MultiBoltRunResult
 
-Result of [`run_multibolt`](@ref).
+Result of [`run_solver`](@ref)`(::MultiBoltInput; ...)`.
 
 - `workdir` — the temporary directory used as `--export_location`.
 - `output_dir` — `joinpath(workdir, config.export_name)`, where MultiBolt
@@ -36,13 +37,13 @@ _resolve_multibolt_path(path::AbstractString) = path
 function _resolve_multibolt_path(::Nothing)
     haskey(ENV, "MULTIBOLT_PATH") && return ENV["MULTIBOLT_PATH"]
     error(
-        "run_multibolt: no MultiBolt binary path given — pass `multibolt_path=\"/path/to/multibolt_linux\"` " *
+        "run_solver: no MultiBolt binary path given — pass `multibolt_path=\"/path/to/multibolt_linux\"` " *
         "or set the MULTIBOLT_PATH environment variable."
     )
 end
 
 """
-    run_multibolt(config::MultiBoltInput; multibolt_path=nothing) -> MultiBoltRunResult
+    run_solver(config::MultiBoltInput; multibolt_path=nothing) -> MultiBoltRunResult
 
 Run MultiBolt with `config`, exporting to a fresh temporary directory.
 
@@ -53,12 +54,12 @@ executable. Resolved from this keyword argument first, then the
 # Example
 
 ```julia
-result = run_multibolt(config; multibolt_path="/opt/multibolt/multibolt_linux")
+result = run_solver(config; multibolt_path="/opt/multibolt/multibolt_linux")
 result.success || error("MultiBolt run failed:\\n\$(result.log)")
 df = load_dataframe(MultiBolt(), result.output_dir)
 ```
 """
-function run_multibolt(config::MultiBoltInput; multibolt_path::Union{AbstractString,Nothing}=nothing)
+function run_solver(config::MultiBoltInput; multibolt_path::Union{AbstractString,Nothing}=nothing)
     path = abspath(_resolve_multibolt_path(multibolt_path))
     workdir = mktempdir()
     args = _multibolt_args(config, workdir)

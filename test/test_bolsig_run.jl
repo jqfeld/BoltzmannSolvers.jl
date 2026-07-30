@@ -16,13 +16,13 @@ const BOLSIG_PATH = get(ENV, "BOLSIGMINUS_PATH", _default_bolsig_path())
 const COLLISION_DIR = _default_collision_dir()
 
 if isfile(BOLSIG_PATH) && isdir(COLLISION_DIR)
-    @testset "run_bolsig reproduces the reference outputs exactly" begin
+    @testset "run_solver(::BOLSIGInput) reproduces the reference outputs exactly" begin
         for (input_name, reference_name) in (
             ("example1_input.dat", "example1.dat"),
             ("example4_input.dat", "example4.dat"),
         )
             input = read_bolsig_input(joinpath(INPUT_DATA, input_name))
-            result = run_bolsig(input; bolsig_path=BOLSIG_PATH, collision_dir=COLLISION_DIR)
+            result = run_solver(input; bolsig_path=BOLSIG_PATH, collision_dir=COLLISION_DIR)
 
             @test result.success
             @test length(result.output_files) == 1
@@ -37,20 +37,20 @@ if isfile(BOLSIG_PATH) && isdir(COLLISION_DIR)
         end
     end
 
-    @testset "run_bolsig error paths" begin
+    @testset "run_solver(::BOLSIGInput) error paths" begin
         input = read_bolsig_input(joinpath(INPUT_DATA, "example1_input.dat"))
 
-        @test_throws ErrorException run_bolsig(input; bolsig_path=BOLSIG_PATH, collision_dir=tempdir())
+        @test_throws ErrorException run_solver(input; bolsig_path=BOLSIG_PATH, collision_dir=tempdir())
 
         withenv("BOLSIGMINUS_PATH" => nothing) do
-            @test_throws ErrorException run_bolsig(input; collision_dir=COLLISION_DIR)
+            @test_throws ErrorException run_solver(input; collision_dir=COLLISION_DIR)
         end
 
         withenv("BOLSIGMINUS_PATH" => BOLSIG_PATH) do
-            result = run_bolsig(input; collision_dir=COLLISION_DIR)
+            result = run_solver(input; collision_dir=COLLISION_DIR)
             @test result.success
         end
     end
 else
-    @warn "Skipping run_bolsig tests — bolsigminus binary/database not found (expected outside this project's own _research/ checkout)" BOLSIG_PATH COLLISION_DIR
+    @warn "Skipping run_solver(::BOLSIGInput) tests — bolsigminus binary/database not found (expected outside this project's own _research/ checkout)" BOLSIG_PATH COLLISION_DIR
 end

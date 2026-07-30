@@ -21,14 +21,14 @@ _fast_settings(; kwargs...) = MultiBoltInput(;
 )
 
 if isfile(MULTIBOLT_PATH) && isdir(XSEC_DIR)
-    @testset "run_multibolt: single-species run is readable" begin
+    @testset "run_solver(::MultiBoltInput): single-species run is readable" begin
         config = _fast_settings(;
             cross_section_files=[joinpath(XSEC_DIR, "Biagi_Ar.txt")],
             species=[MultiBoltSpecies("Ar", 1.0)],
             export_name="test_single",
             sweep=MultiBoltSweep(ENTdSweep, MultiBoltDefinedSweep([100.0])),
         )
-        result = run_multibolt(config; multibolt_path=MULTIBOLT_PATH)
+        result = run_solver(config; multibolt_path=MULTIBOLT_PATH)
 
         @test result.success
         @test result.exit_code == 0
@@ -40,14 +40,14 @@ if isfile(MULTIBOLT_PATH) && isdir(XSEC_DIR)
         @test "mean_energy" in names(df)
     end
 
-    @testset "run_multibolt: two-species defined sweep is readable" begin
+    @testset "run_solver(::MultiBoltInput): two-species defined sweep is readable" begin
         config = _fast_settings(;
             cross_section_files=[joinpath(XSEC_DIR, "Biagi_N2.txt"), joinpath(XSEC_DIR, "Biagi_Ar.txt")],
             species=[MultiBoltSpecies("N2", 0.5), MultiBoltSpecies("Ar", 0.5)],
             export_name="test_sweep",
             sweep=MultiBoltSweep(ENTdSweep, MultiBoltDefinedSweep([50.0, 100.0, 200.0])),
         )
-        result = run_multibolt(config; multibolt_path=MULTIBOLT_PATH)
+        result = run_solver(config; multibolt_path=MULTIBOLT_PATH)
 
         @test result.success
         df = load_dataframe(MultiBolt(), result.output_dir)
@@ -58,7 +58,7 @@ if isfile(MULTIBOLT_PATH) && isdir(XSEC_DIR)
         @test any(n -> occursin("Ar", n), names(df))
     end
 
-    @testset "run_multibolt error paths" begin
+    @testset "run_solver(::MultiBoltInput) error paths" begin
         # bin_frac sweep requires exactly 2 species
         bad_config = _fast_settings(;
             cross_section_files=[joinpath(XSEC_DIR, "Biagi_N2.txt")],
@@ -66,7 +66,7 @@ if isfile(MULTIBOLT_PATH) && isdir(XSEC_DIR)
             export_name="bad",
             sweep=MultiBoltSweep(BinFracSweep, MultiBoltRegularSweep(0.0, 0.2, 1.0)),
         )
-        @test_throws ErrorException run_multibolt(bad_config; multibolt_path=MULTIBOLT_PATH)
+        @test_throws ErrorException run_solver(bad_config; multibolt_path=MULTIBOLT_PATH)
 
         good_config = _fast_settings(;
             cross_section_files=[joinpath(XSEC_DIR, "Biagi_Ar.txt")],
@@ -74,14 +74,14 @@ if isfile(MULTIBOLT_PATH) && isdir(XSEC_DIR)
             export_name="test_no_path",
         )
         withenv("MULTIBOLT_PATH" => nothing) do
-            @test_throws ErrorException run_multibolt(good_config)
+            @test_throws ErrorException run_solver(good_config)
         end
 
         withenv("MULTIBOLT_PATH" => MULTIBOLT_PATH) do
-            result = run_multibolt(good_config)
+            result = run_solver(good_config)
             @test result.success
         end
     end
 else
-    @warn "Skipping run_multibolt tests — multibolt_linux binary/cross-sections not found (expected outside this project's own _research/ checkout)" MULTIBOLT_PATH XSEC_DIR
+    @warn "Skipping run_solver(::MultiBoltInput) tests — multibolt_linux binary/cross-sections not found (expected outside this project's own _research/ checkout)" MULTIBOLT_PATH XSEC_DIR
 end

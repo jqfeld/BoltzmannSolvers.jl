@@ -12,10 +12,10 @@ end
     include("test_bolsig_input.jl")
 end
 
-@safetestset "run_bolsig" begin
+@safetestset "run_solver(::BOLSIGInput)" begin
     include("test_bolsig_run.jl")
 end
 
-@safetestset "run_multibolt" begin
+@safetestset "run_solver(::MultiBoltInput)" begin
     include("test_multibolt_run.jl")
 end

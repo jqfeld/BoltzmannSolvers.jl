@@ -24,7 +24,7 @@
 """
     BOLSIGRunResult
 
-Result of [`run_bolsig`](@ref).
+Result of [`run_solver`](@ref)`(::BOLSIGInput; ...)`.
 
 - `workdir` — the temporary directory the run happened in (`input.dat`,
   symlinked/copied collision files, `bolsiglog.txt`, and any output files
@@ -49,13 +49,13 @@ _resolve_bolsig_path(path::AbstractString) = path
 function _resolve_bolsig_path(::Nothing)
     haskey(ENV, "BOLSIGMINUS_PATH") && return ENV["BOLSIGMINUS_PATH"]
     error(
-        "run_bolsig: no BOLSIG+ binary path given — pass `bolsig_path=\"/path/to/bolsigminus\"` " *
+        "run_solver: no BOLSIG+ binary path given — pass `bolsig_path=\"/path/to/bolsigminus\"` " *
         "or set the BOLSIGMINUS_PATH environment variable."
     )
 end
 
 """
-    run_bolsig(input::BOLSIGInput; bolsig_path=nothing, collision_dir=pwd()) -> BOLSIGRunResult
+    run_solver(input::BOLSIGInput; bolsig_path=nothing, collision_dir=pwd()) -> BOLSIGRunResult
 
 Write `input` to a temporary directory (via [`write_bolsig_input`](@ref),
 which also validates it), place every collision file it references
@@ -72,12 +72,12 @@ alongside it, and run BOLSIG+ there.
 # Example
 
 ```julia
-result = run_bolsig(input; bolsig_path="/opt/bolsig/bolsigminus")
+result = run_solver(input; bolsig_path="/opt/bolsig/bolsigminus")
 result.success || error("BOLSIG+ run failed:\\n\$(result.log)")
 df = load_dataframe(BOLSIG(), result.output_files[1])
 ```
 """
-function run_bolsig(input::BOLSIGInput; bolsig_path::Union{AbstractString,Nothing}=nothing, collision_dir::AbstractString=pwd())
+function run_solver(input::BOLSIGInput; bolsig_path::Union{AbstractString,Nothing}=nothing, collision_dir::AbstractString=pwd())
     # abspath: `Cmd(...; dir=workdir)` below spawns with `workdir` as the
     # working directory, so a relative `bolsig_path` (or a relative
     # `collision_dir`, resolved via `joinpath` further down) must be
@@ -92,7 +92,7 @@ function run_bolsig(input::BOLSIGInput; bolsig_path::Union{AbstractString,Nothin
     for file in unique(c.file for c in input.collisions)
         src = joinpath(collision_dir, file)
         isfile(src) || error(
-            "run_bolsig: collision file '$file' not found in collision_dir=\"$collision_dir\"."
+            "run_solver: collision file '$file' not found in collision_dir=\"$collision_dir\"."
         )
         dst = joinpath(workdir, file)
         try

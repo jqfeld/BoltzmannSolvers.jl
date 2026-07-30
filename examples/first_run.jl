@@ -28,8 +28,8 @@ input = BOLSIGInput(;
 )
 
 # bolsig_path resolves from the BOLSIGMINUS_PATH environment variable if not
-# given explicitly here — see run_bolsig's docstring (src/solvers/bolsig_run.jl).
-result = run_bolsig(input; collision_dir=joinpath(@__DIR__, "data"))
+# given explicitly here — see run_solver's docstring (src/solvers/bolsig_run.jl).
+result = run_solver(input; collision_dir=joinpath(@__DIR__, "data"))
 result.success || error("BOLSIG+ run failed:\n$(result.log)")
 
 df = load_dataframe(BOLSIG(), result.output_files[1])
