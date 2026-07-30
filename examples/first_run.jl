@@ -1,7 +1,7 @@
 using BoltzmannSolvers
 using DataFrames
 
-# BOLSIG+'s own first example (_research/bolsig/input-examples.dat):
+# BOLSIG+'s own first example (_research/input_data/bolsig/input-examples.dat):
 # 10%/90% Ar/He mixture, E/N swept 0.1-1000 Td via two chained RUNSERIES
 # segments (31 exponentially-spaced points from 0.1-100 Td, then 9
 # linearly-spaced from 200-1000 Td — see BOLSIGSeriesRun's docstring for why

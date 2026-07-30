@@ -10,7 +10,7 @@ const REFERENCE_DATA = joinpath(@__DIR__, "data", "bolsig")
 # (with a warning) rather than fail when they're not available, same
 # pattern as the HDF5-not-loaded guard in test_loki.jl.
 _default_bolsig_path() = joinpath(@__DIR__, "..", "_research", "bin", "bolsigminus")
-_default_collision_dir() = joinpath(@__DIR__, "..", "_research", "bolsig")
+_default_collision_dir() = joinpath(@__DIR__, "..", "_research", "input_data", "bolsig")
 
 const BOLSIG_PATH = get(ENV, "BOLSIGMINUS_PATH", _default_bolsig_path())
 const COLLISION_DIR = _default_collision_dir()

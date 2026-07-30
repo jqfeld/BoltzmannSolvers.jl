@@ -1,3 +1,7 @@
 [deps]
+AbstractGPs = "99985d1d-32ba-4be9-9821-2ec096f28918"
 BoltzmannSolvers = "3936891d-e4a6-4f9f-ac95-6e87deea8a87"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+KernelFunctions = "ec8451be-7e33-11e9-00cf-bbf324bd1392"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"

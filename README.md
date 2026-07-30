@@ -20,7 +20,32 @@ Currently, reading the output from three solvers are implemented:
   Note: `JLD2.jl` does *not* work for this — it's Julia's own serialization
   format, not a general third-party-HDF5 reader, and errors on this file's
   `reducedField` dataset specifically.
-- `MultiBolt()`
+- `MultiBolt()` — `source` is a run's export directory (`muN_FLUX.txt`/
+  `DTN_FLUX.txt`/`DLN_FLUX.txt`/`avg_en.txt`/`alpha_eff_N.txt` joined on
+  `E_N`, plus a `PerGas/<gas>/*` directory of per-reaction-rate files).
+
+  MultiBolt has no input *file* format at all (unlike BOLSIG+) — it's
+  entirely command-line-argument driven (confirmed by running the real
+  `multibolt_linux --help` and its own bundled example scripts), so there's
+  no `read_multibolt_input` counterpart to `read_bolsig_input`:
+  `MultiBoltInput(; kwargs...)` models one run's configuration, and
+  `run_multibolt(config::MultiBoltInput; multibolt_path=nothing)` runs it
+  directly (translating the struct into CLI args, exporting to a fresh temp
+  directory) — no intermediate file, no `write_multibolt_input`.
+  `multibolt_path` resolves from the keyword argument, then the
+  `MULTIBOLT_PATH` environment variable. Returns a `MultiBoltRunResult`
+  (`workdir`, `output_dir`, `success`, `exit_code`, `log`) —
+  `success = exit_code == 0 && isdir(output_dir)`; unlike BOLSIG+,
+  MultiBolt exits `0` on a normal run (confirmed directly), no quirky
+  "always nonzero" behavior to work around.
+
+  One real bug in the binary itself, found by testing (not documented
+  anywhere): a truly bare run — no `--sweep_option`/`--sweep_style` at all —
+  reliably crashes `multibolt_linux` with `std::bad_alloc`, regardless of
+  grid/convergence settings. `MultiBoltInput`'s `sweep = nothing` (its
+  default, meaning "just run once at the given conditions") is handled by
+  transparently routing it through an equivalent 1-point `def` sweep at the
+  current `EN_Td` instead, so this doesn't surface as a footgun.
 - `BOLSIG()` — `source` is a single BOLSIG+ output file (not a directory).
   Auto-detects which of BOLSIG+'s three result layouts the file uses: the
   condensed `R#`/`A#`/`C#` indexed-table format, the verbose
@@ -97,6 +122,26 @@ julia> result.success || error("BOLSIG+ run failed:\n$(result.log)")
 julia> df = load_dataframe(BOLSIG(), result.output_files[1])
 ```
 
+Configuring and running MultiBolt (needs the real `multibolt_linux`/
+`multibolt_win64.exe` binary on disk — set `MULTIBOLT_PATH` or pass
+`multibolt_path`):
+
+```julia
+julia> using BoltzmannSolvers
+julia> config = MultiBoltInput(;
+           cross_section_files = ["/opt/multibolt/cross-sections/Biagi_N2.txt", "/opt/multibolt/cross-sections/Biagi_Ar.txt"],
+           species             = [MultiBoltSpecies("N2", 0.5), MultiBoltSpecies("Ar", 0.5)],
+           export_name         = "my_run",
+           sweep               = MultiBoltSweep(ENTdSweep, MultiBoltDefinedSweep([50.0, 100.0, 200.0])),
+       )
+julia> result = run_multibolt(config; multibolt_path="/opt/multibolt/multibolt_linux")
+julia> result.success || error("MultiBolt run failed:\n$(result.log)")
+julia> df = load_dataframe(MultiBolt(), result.output_dir)
+```
+
 ## TODO
 
-- Add test data for `MultiBolt` solver output (e.g. under `test/data/`, following the same pattern as `test/data/loki/` and `test/data/bolsig/`) and real tests in `test/runtests.jl` — `LoKI` and `BOLSIG` now have real tests against real solver output, but `MultiBolt`'s `load_raw_dataframe`/`default_swarm_names` remain untested.
+- `MultiBolt`/`BOLSIG` real-run tests (`test/test_multibolt_run.jl`/
+  `test/test_bolsig_run.jl`) are skip-if-absent — they only run when the
+  real (uncommitted, platform-specific) solver binaries are available
+  locally under `_research/`, so CI never actually exercises them.

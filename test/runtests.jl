@@ -15,3 +15,7 @@ end
 @safetestset "run_bolsig" begin
     include("test_bolsig_run.jl")
 end
+
+@safetestset "run_multibolt" begin
+    include("test_multibolt_run.jl")
+end
