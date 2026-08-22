@@ -4,7 +4,7 @@ struct NamedInterpolation{I}
     name::Symbol
     itp::I
 end
-NamedInterpolation(name, y, x) = NamedInterpolation(name,LinearInterpolation(y,x; extrapolate=true))
+NamedInterpolation(name, y, x) = NamedInterpolation(name,LinearInterpolation(y,x; extrapolation=ExtrapolationType.Constant))
 
 Base.nameof(i::NamedInterpolation) = i.name
 Base.show(io::IO, i::NamedInterpolation) = Base.print(io::IO, "[$(i.name)]")
