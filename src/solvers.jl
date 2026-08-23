@@ -3,6 +3,9 @@ abstract type Solver end
 include("solvers/loki.jl")
 export LoKI
 
+include("solvers/loki_input.jl")
+export LoKIInput, LoKISmartGrid, read_loki_input
+
 include("solvers/multibolt.jl")
 export MultiBolt
 

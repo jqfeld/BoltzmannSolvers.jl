@@ -4,6 +4,10 @@ using SafeTestsets
     include("test_loki.jl")
 end
 
+@safetestset "LoKI input files" begin
+    include("test_loki_input.jl")
+end
+
 @safetestset "BOLSIG solver" begin
     include("test_bolsig.jl")
 end

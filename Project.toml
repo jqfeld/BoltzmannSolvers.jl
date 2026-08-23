@@ -1,6 +1,6 @@
 name = "BoltzmannSolvers"
 uuid = "3936891d-e4a6-4f9f-ac95-6e87deea8a87"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Jan Kuhfeld <jan.kuhfeld@rub.de> and contributors"]
 
 [deps]
