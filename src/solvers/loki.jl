@@ -45,7 +45,9 @@ function _parse_loki_txt_reactions(source)
     lines = filter(startswith('#'), readlines(rate_table_file))
 
     for l in lines
-        m = match(r"(\d+)\s+([^\-\<]+)(<->|->|<-)(.*),(.+?)\s", l)
+        # non-greedy lhs up to the first arrow: species labels may contain
+        # '-' themselves (e.g. "O(-,gnd)", "O2(A3Su+_C3Du_c1Su-)")
+        m = match(r"(\d+)\s+(.+?)(<->|->|<-)(.*),(.+?)\s", l)
         isnothing(m) && continue
         id, lhs, dir, rhs, type = m
         append!(reaction_names, _loki_reaction_columns(id, lhs, dir, rhs, type))

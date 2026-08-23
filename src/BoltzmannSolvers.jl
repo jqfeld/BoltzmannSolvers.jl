@@ -31,6 +31,7 @@ end
 
 export load_dataframe
 export create_interpolation
+export NamedInterpolation, NamedInterpolationDerivative
 
 """
     normalize_reaction_name!(x)

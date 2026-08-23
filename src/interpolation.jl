@@ -40,3 +40,25 @@ function create_interpolation(df::DataFrame, y_names::T, x_name;
     end
     return NamedInterpolation(Symbol(name), ys, df[!,x_name])
 end
+
+"""
+    NamedInterpolationDerivative(name, itp)
+
+d/dx of a [`NamedInterpolation`](@ref)'s interpolation. Symbolics needs this
+as its own callable object: a registered function is opaque to symbolic
+differentiation, so without a registered derivative any Jacobian built
+*symbolically* through an interpolation sees zero — silently freezing
+implicit solves that must invert a tabulated quantity.
+"""
+struct NamedInterpolationDerivative{I}
+    name::Symbol
+    itp::I
+end
+
+Base.nameof(d::NamedInterpolationDerivative) = d.name
+Base.show(io::IO, d::NamedInterpolationDerivative) = Base.print(io, "[$(d.name)]")
+(d::NamedInterpolationDerivative)(x) = DataInterpolations.derivative(d.itp, x)
+
+"The derivative object of a `NamedInterpolation` (see [`NamedInterpolationDerivative`](@ref))."
+derivative_of(i::NamedInterpolation) =
+    NamedInterpolationDerivative(Symbol(i.name, "′"), i.itp)
